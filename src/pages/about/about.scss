@@ -1,0 +1,41 @@
+$primary-color: beige;
+$second-color: #a7d129;
+$icon-size: 32px;
+
+.beige {
+    color: $primary-color;
+    text-align: center;
+}
+.link {
+    color: $second-color;
+}
+.link:hover {
+    color: $primary-color;
+    border-color:  $second-color;
+}
+.button {
+    border-style: none;
+    display: block;
+    color: $second-color;
+}
+.button:hover {
+    background-color: #f5f5dc15;
+    color: $primary-color;
+}
+.box {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+}
+.avatar {
+    position: absolute;
+    top: -80px;
+    left: 0;
+    right: 0;
+}
+.icon {
+    font-size: $icon-size;
+}
