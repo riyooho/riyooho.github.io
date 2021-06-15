@@ -1,5 +1,5 @@
 import React from 'react'
-import { Card, Avatar, Row, Image, Divider, Typography, Space } from 'antd'
+import { Card, Avatar, Row, Image, Typography, Space } from 'antd'
 import { MailOutlined, TwitterOutlined, LinkedinOutlined } from '@ant-design/icons';
 import './about.scss'
 import { AvaBg } from '../../assets'
