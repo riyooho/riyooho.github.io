@@ -1,6 +1,16 @@
+$bg-color1: #222831;
+$bg-color2: #d6d7da;
 $primary-color: beige;
 $second-color: #a7d129;
 $icon-size: 32px;
+
+.main-page {
+    display: flex;
+    justify-content: center;
+    background-color: $bg-color1;
+    height: 100vh;
+    color: $primary-color;
+}
 
 .beige {
     color: $primary-color;
@@ -8,28 +18,39 @@ $icon-size: 32px;
 }
 .link {
     color: $second-color;
-}
-.link:hover {
-    color: $primary-color;
-    border-color:  $second-color;
+    &:hover {
+        color: $primary-color;
+        border-color:  $second-color;
+    }
 }
 .button {
     border-style: none;
     display: block;
     color: $second-color;
-}
-.button:hover {
-    background-color: #f5f5dc15;
-    color: $primary-color;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    &:hover {
+        background-color: #f5f5dc15;
+        color: $primary-color;
+    }
 }
 .box {
     display: flex;
+    justify-content: center;
     flex-direction: column;
     flex-wrap: wrap;
     align-items: center;
-    justify-content: center;
     min-height: 100vh;
 }
+
+.card {
+    text-align: center; 
+    width: 350;
+    background-color: #393e46; 
+    border-radius: 50px 50px 0 0; 
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
 .avatar {
     position: absolute;
     top: -80px;

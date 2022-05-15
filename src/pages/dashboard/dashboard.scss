@@ -1,0 +1,20 @@
+$bg-color1: #222831;
+$bg-color2: #d6d7da;
+$primary-color: beige;
+$second-color: #a7d129;
+$icon-size: 32px;
+
+.main-page {
+    display: flex;
+    background-color: $bg-color1;
+    height: 100vh;
+    color: $primary-color;
+}
+.left {
+    background-color: $bg-color1;
+    width: 400px;
+}
+.right {
+    flex: 1;
+    background-color: $bg-color2;
+}

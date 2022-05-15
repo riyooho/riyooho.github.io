@@ -1,11 +1,15 @@
 import React from 'react'
+import "./dashboard.scss"
 
 const Dashboard = () => {
     return (
-        <div>
-            <p>Card content</p>
-            <p>Card content</p>
-            <p>Card content</p>
+        <div className="main-page">
+            <div className="left">
+                <p>Kiri</p>
+            </div>
+            <div className="right">
+                <p>Kanan</p>
+            </div>
         </div>
     )
 }
