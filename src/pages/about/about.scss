@@ -23,7 +23,7 @@ $icon-size: 32px;
         border-color:  $second-color;
     }
 }
-.button {
+.button1 {
     border-style: none;
     display: block;
     color: $second-color;
@@ -32,6 +32,26 @@ $icon-size: 32px;
     &:hover {
         background-color: #f5f5dc15;
         color: $primary-color;
+        border-radius: 8px;
+    }
+}
+.button2 {
+    background-color: #f5f5dc15;
+    border-top: 1px $primary-color solid;
+    display: block;
+    color: $primary-color;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    letter-spacing: 20px;
+    &:hover {
+        color: $second-color;
+    }
+    &:hover span {
+        display: none;
+    }
+    &:hover::before {
+        letter-spacing: 0px;
+        content: "check my resume!";
     }
 }
 .box {
@@ -59,4 +79,16 @@ $icon-size: 32px;
 }
 .icon {
     font-size: $icon-size;
+}
+.margintop {
+    margin-top: 15px;
+}
+.status {
+    margin-top: 25px;
+    margin-bottom: 0px;
+    padding: 8px 0;
+    display: block;
+    border-bottom: 1px $primary-color solid;
+    border-top: 1px $primary-color solid;
+    color: $second-color;
 }

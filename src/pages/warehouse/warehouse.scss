@@ -1,0 +1,88 @@
+$bg-color1: #222831;
+$bg-color2: #d6d7da;
+$primary-color: beige;
+$second-color: #a7d129;
+$icon-size: 32px;
+
+body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.container {
+    display: grid;
+    grid-template-areas: 
+        "load receipt office"
+        "dispatch profile storage"
+        "picpac facil storage";
+    grid-template-columns: 1fr 1fr 1.3fr;
+    grid-template-rows: 1fr 1fr 1fr;
+    width: 80vh;
+    height: 80vh;
+    border: 2px black solid;
+}
+
+.circle {
+    border: 2px black solid;
+    border-radius: 50%;
+    width: 100px;
+    height: 100px;
+}
+
+.card {
+    display: block;
+    background-color: none;
+    border: 2px black solid;
+    border-radius: 5px;
+    margin: 5px;
+    margin-bottom: 20px;
+    padding: 5px;
+}
+
+load {
+    grid-area: load;
+    background-color: black;
+}
+
+receipt {
+    grid-area: receipt;
+    background-color: orange;
+}
+
+office {
+    grid-area: office;
+    background-color: white;
+}
+
+dispatch {
+    grid-area: dispatch;
+    background-color: green;
+}
+
+profile {
+    grid-area: profile;
+    background-color: gray;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+storage {
+    grid-area: storage;
+    background-color: red;
+    padding: 10px;
+}
+
+picpac {
+    grid-area: picpac;
+    background-color: yellow;
+}
+
+facil {
+    grid-area: facil;
+    background-color: blue;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
