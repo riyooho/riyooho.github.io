@@ -4,7 +4,7 @@ const { Text } = Typography;
 
 const Footer = () => {
     return (
-        <Text style={{color: "beige"}}>©2022 Copyright @riyooho</Text>
+        <Text style={{color: "beige"}}>©2022 Copyright @riyooho | Created with React & Antd Design</Text>
     )
 }
 
