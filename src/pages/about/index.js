@@ -32,7 +32,7 @@ const About = () => {
                         <a className="link" href="https://www.linkedin.com/in/wsnugroho"><LinkedinOutlined className="icon"/></a>
                     </Space>
                     <Divider orientation="left" style={{borderColor: 'beige', color: 'beige'}}>output</Divider>
-                    <a href="/notion/holidate"><div className="button1">🚧🚧  still developing ideas~ 🚧🚧</div></a>
+                    <a href="/#/notion/holidate"><div className="button1">🚧🚧  still developing ideas~ 🚧🚧</div></a>
                 </Card>
                 <Footer/>
             </div>
