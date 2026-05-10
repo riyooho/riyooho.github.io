@@ -1,0 +1,131 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Navbar from '../../components/Navbar.astro';
+import Footer from '../../components/Footer.astro';
+
+const projects = (await getCollection('projects')).sort(
+  (a, b) => Number(b.data.featured) - Number(a.data.featured)
+);
+
+const allCategories = ['All', ...new Set(projects.map(p => p.data.category))];
+---
+
+<BaseLayout title="Projects — Satrio">
+  <Navbar />
+  <main class="pt-24 pb-section">
+    <div class="container-site">
+
+      <!-- Header -->
+      <div class="mb-16" data-animate>
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
+          <h1 class="section-title">Projects</h1>
+        </div>
+      </div>
+
+      <!-- Category Filter -->
+      <div class="flex flex-wrap gap-2 mb-10" data-animate>
+        {allCategories.map((cat, i) => (
+          <button
+            class={`filter-btn font-display text-xs font-600 px-4 py-2 border tracking-wide uppercase transition-colors duration-200
+              ${i === 0
+                ? 'bg-ink text-paper border-ink'
+                : 'bg-transparent text-muted border-subtle hover:border-ink hover:text-ink'
+              }`}
+            data-filter={cat}
+          >
+            {cat}
+          </button>
+        ))}
+      </div>
+
+      <!-- Projects Grid -->
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {projects.map((project, i) => (
+	<a href={`/projects/${project.slug}`}>
+          <article
+            class="card group flex flex-col project-card"
+            data-category={project.data.category}
+            data-animate
+            data-animate-delay={(i % 3) + 1}
+          >
+            <!-- Category + Featured badge -->
+            <div class="flex items-center justify-between mb-4">
+              <span class="tag">{project.data.category}</span>
+              {project.data.featured && <span class="tag-accent">Featured</span>}
+            </div>
+
+            <!-- Title -->
+            <h2 class="font-display font-700 text-xl mb-3 group-hover:text-accent transition-colors leading-tight">
+              {project.data.title}
+            </h2>
+
+            <!-- Description -->
+            <p class="font-body text-sm text-muted leading-relaxed mb-4 flex-1">
+              {project.data.description}
+            </p>
+
+            <!-- Metrics -->
+            <div class="flex flex-wrap gap-2 mb-5">
+              {project.data.metrics.map(m => (
+                <span class="font-mono text-2xs text-accent bg-accent/8 px-2 py-1 border border-accent/20">
+                  {m.value} {m.label}
+                </span>
+              ))}
+            </div>
+
+            <!-- Stack Tags -->
+            <div class="flex flex-wrap gap-1.5 mb-6">
+              {project.data.stack.map(tech => (
+                <span class="tag">{tech}</span>
+              ))}
+            </div>
+
+            <!-- View Study Case -->
+            <div class="inline-flex items-center gap-1 mt-3 font-display text-2xs font-600 text-muted group-hover:text-accent transition-colors uppercase tracking-wider">
+            View case study
+              <svg class="w-3 h-3 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+              </svg>
+            </div>
+
+          </article>
+	</a>
+        ))}
+      </div>
+
+    </div>
+  </main>
+  <Footer />
+</BaseLayout>
+
+<script>
+  const filterBtns = document.querySelectorAll<HTMLButtonElement>('.filter-btn');
+  const projectCards = document.querySelectorAll<HTMLElement>('.project-card');
+
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const filter = btn.dataset.filter;
+
+      filterBtns.forEach(b => {
+        b.classList.remove('bg-ink', 'text-paper', 'border-ink');
+        b.classList.add('bg-transparent', 'text-muted', 'border-subtle');
+      });
+      btn.classList.remove('bg-transparent', 'text-muted', 'border-subtle');
+      btn.classList.add('bg-ink', 'text-paper', 'border-ink');
+
+      projectCards.forEach(card => {
+        const show = filter === 'All' || card.dataset.category === filter;
+        if (show) {
+          card.style.display = '';
+          requestAnimationFrame(() => {
+            card.style.opacity = '1';
+            card.style.transition = 'opacity 0.3s ease';
+          });
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    });
+  });
+</script>

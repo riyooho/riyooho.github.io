@@ -1,0 +1,129 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+  type?: 'website' | 'article';
+  canonical?: string;
+}
+
+const SITE = {
+  name: 'Wahyu Satrio Nugroho',
+  url: 'https://riyooho.github.io',
+  author: 'Wahyu Satrio Nugroho',
+  twitter: '@yourhandle', // ← fill this
+  defaultImage: '/images/og-default.jpg',
+};
+
+const {
+  title = 'Satrio — Analyst Lead | Data & SCM',
+  description = 'Personal landing page, portfolio, and blog.',
+  image = SITE.defaultImage,
+  type = 'website',
+  canonical = Astro.url.href,
+} = Astro.props;
+
+const seo = {
+  title,
+  description,
+  canonical,
+  image: new URL(image, SITE.url).href,
+  type,
+};
+---
+
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+  <head>
+    <!-- Basic -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- SEO -->
+    <title>{seo.title}</title>
+    <meta name="description" content={seo.description} />
+    <meta name="author" content={SITE.author} />
+    <link rel="canonical" href={seo.canonical} />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content={seo.type} />
+    <meta property="og:site_name" content={SITE.name} />
+    <meta property="og:title" content={seo.title} />
+    <meta property="og:description" content={seo.description} />
+    <meta property="og:url" content={seo.canonical} />
+    <meta property="og:image" content={seo.image} />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:creator" content={SITE.twitter} />
+    <meta name="twitter:title" content={seo.title} />
+    <meta name="twitter:description" content={seo.description} />
+    <meta name="twitter:image" content={seo.image} />
+
+    <!-- Schema -->
+    <script
+      type="application/ld+json"
+      set:html={JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'Person',
+        name: SITE.name,
+        url: SITE.url,
+        jobTitle: 'Analyst Lead',
+        description: seo.description,
+        sameAs: [
+          'https://github.com/riyooho',
+          'https://linkedin.com/in/wsnugroho',
+        ],
+      })}
+    />
+
+    <!-- Icons -->
+    <link rel="icon" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <!-- Performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <!-- Sitemap -->
+    <link rel="sitemap" href="/sitemap-index.xml" />
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-G6Y8ZVDVRS"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-G6Y8ZVDVRS');
+    </script>
+  </head>
+
+  <body>
+    <slot />
+
+    <!-- Scroll Animation -->
+    <script is:inline>
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+
+            entry.target.classList.add('in-view');
+            observer.unobserve(entry.target);
+          });
+        },
+        {
+          threshold: 0.1,
+          rootMargin: '0px 0px -60px 0px',
+        }
+      );
+
+      document
+        .querySelectorAll('[data-animate]')
+        .forEach((el) => observer.observe(el));
+    </script>
+  </body>
+</html>

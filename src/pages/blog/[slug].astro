@@ -1,0 +1,113 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Navbar from '../../components/Navbar.astro';
+import Footer from '../../components/Footer.astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog');
+  return posts.map(post => ({
+    params: { slug: post.slug },
+    props:  { post },
+  }));
+}
+
+const { post } = Astro.props;
+const { Content } = await post.render();
+const { title, description, pubDate, category, tags, readingTime } = post.data;
+
+const formattedDate = pubDate.toLocaleDateString('en-En', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+});
+---
+
+<BaseLayout
+  title={`${title} — Your Name`}
+  description={description}
+  ogType="article"
+>
+  <Navbar />
+  <main class="pt-24 pb-section">
+    <div class="container-site">
+
+      <!-- Back -->
+      <a
+        href="/blog"
+        class="inline-flex items-center gap-2 font-display text-xs text-muted hover:text-ink transition-colors mb-12 group"
+        data-animate
+      >
+        <svg class="w-3 h-3 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16l-4-4m0 0l4-4m-4 4h18"/>
+        </svg>
+        All posts	
+      </a>
+
+      <!-- Article Header -->
+      <header class="max-w-prose2 mb-12" data-animate data-animate-delay="1">
+        <!-- Meta row -->
+        <div class="flex flex-wrap items-center gap-3 mb-5">
+          <span class="tag-accent">{category}</span>
+          <span class="font-mono text-2xs text-muted">{formattedDate}</span>
+          <span class="font-mono text-2xs text-muted flex items-center gap-1">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            {readingTime} mins
+          </span>
+        </div>
+
+        <!-- Title -->
+        <h1 class="font-display font-800 text-3xl md:text-4xl lg:text-5xl leading-tight mb-6 text-balance">
+          {title}
+        </h1>
+
+        <!-- Description / lead -->
+        <p class="font-body text-lg text-muted leading-relaxed">
+          {description}
+        </p>
+
+        <!-- Tags -->
+        <div class="flex flex-wrap gap-2 mt-6">
+          {tags.map(tag => <span class="tag">{tag}</span>)}
+        </div>
+
+        <div class="w-full h-px bg-subtle mt-8"></div>
+      </header>
+
+      <!-- Article Body — konten dari Markdown -->
+      <article class="prose-custom max-w-prose2" data-animate data-animate-delay="2">
+        <Content />
+      </article>
+
+      <!-- Author bio -->
+      <div
+        class="max-w-prose2 mt-8 pt-5 border-t border-subtle flex items-start gap-5"
+        data-animate
+      >
+        <div>
+          <p class="font-display text-lg mb-1">Satrio</p>
+          <p class="font-body text-sm text-muted leading-relaxed">
+            An analyst sharing insights on data, supply chain, and real-world experience.
+          </p>
+          <a href="/contact" class="font-display text-xs text-accent hover:text-ink transition-colors mt-2 inline-block">
+            Contact me →
+          </a>
+        </div>
+      </div>
+
+      <!-- Related / Next post nudge -->
+      <div class="max-w-prose2 mt-10 pt-8 border-t border-subtle flex justify-between items-center" data-animate>
+        <a href="/blog" class="btn-outline text-xs py-2 px-4">
+          ← Back to Blog
+        </a>
+        <a href="/projects" class="font-display text-xs font-600 text-muted hover:text-accent transition-colors">
+          Forward to Projects →
+        </a>
+      </div>
+
+    </div>
+  </main>
+  <Footer />
+</BaseLayout>

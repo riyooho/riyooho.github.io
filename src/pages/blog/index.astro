@@ -1,0 +1,97 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Navbar from '../../components/Navbar.astro';
+import Footer from '../../components/Footer.astro';
+	
+const posts = (await getCollection('blog')).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+);
+
+const allCategories = ['All', ...new Set(posts.map(p => p.data.category))];
+---
+
+<BaseLayout title="Blog — Satrio">
+  <Navbar />
+  <main class="pt-24 pb-section">
+    <div class="container-site">
+
+      <!-- Header -->
+      <div class="mb-16" data-animate>
+        <h1 class="section-title mb-4">Blog</h1>
+      </div>
+
+      <!-- Category filter -->
+      <div class="flex flex-wrap gap-2 mb-12" data-animate>
+        {allCategories.map((cat, i) => (
+          <button
+            class={`filter-btn font-display text-xs font-600 px-4 py-2 border tracking-wide uppercase transition-colors
+              ${i === 0 ? 'bg-ink text-paper border-ink' : 'bg-transparent text-muted border-subtle hover:border-ink hover:text-ink'}`}
+            data-filter={cat}
+          >
+            {cat}
+          </button>
+        ))}
+      </div>
+
+      <!-- Posts list -->
+      <div class="space-y-0">
+        {posts.map((post, i) => (
+          <article
+            class="post-card group py-8 border-t border-subtle last:border-b hover:bg-paper/60 -mx-4 px-4 transition-colors duration-200"
+            data-category={post.data.category}
+            data-animate
+            data-animate-delay={(i % 3) + 1}
+          >
+            <a href={`/blog/${post.slug}`} class="grid md:grid-cols-[1fr_auto] gap-6 md:gap-12 items-center">
+              <div>
+                <div class="flex flex-wrap items-center gap-3 mb-2">
+                  <span class="tag-accent">{post.data.category}</span>
+                  <span class="font-mono text-2xs text-muted">
+                    {post.data.pubDate.toLocaleDateString('id-ID', { day:'numeric', month:'long', year:'numeric' })}
+                  </span>
+                  <span class="font-mono text-2xs text-muted">{post.data.readingTime} menit baca</span>
+                </div>
+                <h2 class="font-display font-700 text-xl md:text-2xl mb-2 group-hover:text-accent transition-colors leading-tight">
+                  {post.data.title}
+                </h2>
+                <p class="font-body text-sm text-muted leading-relaxed mb-4 max-w-2xl">
+                  {post.data.description}
+                </p>
+                <div class="flex flex-wrap gap-2">
+                  {post.data.tags.map(tag => <span class="tag">{tag}</span>)}
+                </div>
+              </div>
+              <div class="hidden md:flex items-center justify-center w-10 h-10 border border-subtle group-hover:border-accent group-hover:bg-accent group-hover:text-paper transition-all duration-200 text-muted flex-shrink-0">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                </svg>
+              </div>
+            </a>
+          </article>
+        ))}
+      </div>
+
+    </div>
+  </main>
+  <Footer />
+</BaseLayout>
+
+<script>
+  const filterBtns = document.querySelectorAll('.filter-btn');
+  const postCards = document.querySelectorAll('.post-card');
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const filter = btn.dataset.filter;
+      filterBtns.forEach(b => {
+        b.classList.remove('bg-ink','text-paper','border-ink');
+        b.classList.add('bg-transparent','text-muted','border-subtle');
+      });
+      btn.classList.remove('bg-transparent','text-muted','border-subtle');
+      btn.classList.add('bg-ink','text-paper','border-ink');
+      postCards.forEach(card => {
+        card.style.display = (filter === 'All' || card.dataset.category === filter) ? '' : 'none';
+      });
+    });
+  });
+</script>
