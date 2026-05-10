@@ -8,7 +8,7 @@ export default defineConfig({
   base: '/riyooho.github.io',
   integrations: [
     tailwind(),
-    sitemap(),
+    // sitemap(),
     mdx(),
   ],
   devToolbar: {
