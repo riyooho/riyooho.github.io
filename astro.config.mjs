@@ -4,7 +4,7 @@ import sitemap from '@astrojs/sitemap';
 import mdx from '@astrojs/mdx';
 
 export default defineConfig({
-  site: 'https://riyooho.github.io',
+  site: 'https://riyooho.github.io/riyooho.github.io',
   base: '/riyooho.github.io',
   integrations: [
     tailwind(),
