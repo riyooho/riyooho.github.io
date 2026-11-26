@@ -2,8 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { toProjectSlides, toWritingRows } from './slides.js';
 
-const project = { id: 'route-redesign', data: { featured: true, category: 'Supply chain', title: 'Route redesign', description: 'Late deliveries to on time, 2025', cover: '/images/route.png' } };
-const post = { id: 'my-career-journey', data: { featured: true, title: 'From Logistics to Logic', category: 'Personal', pubDate: new Date('2026-05-01'), readingTime: 3 } };
+const project = { id: 'route-redesign.md', slug: 'route-redesign', data: { featured: true, category: 'Supply chain', title: 'Route redesign', description: 'Late deliveries to on time, 2025', cover: '/images/route.png' } };
+const post = { id: 'my-career-journey.md', slug: 'my-career-journey', data: { featured: true, title: 'From Logistics to Logic', category: 'Personal', pubDate: new Date('2026-05-01'), readingTime: 3 } };
 
 test('no featured project gives exactly three labelled placeholders', () => {
   const slides = toProjectSlides([]);

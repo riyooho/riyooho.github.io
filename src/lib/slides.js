@@ -27,7 +27,7 @@ export function toProjectSlides(entries) {
     category: e.data.category,
     title: e.data.title,
     meta: e.data.description,
-    href: `/projects/${e.id}/`,
+    href: `/projects/${e.slug}/`,
     cover: e.data.cover ?? null,
     placeholder: false,
   }));
@@ -38,7 +38,7 @@ export function toWritingRows(entries) {
   const rows = pickWriting(entries, 3).map((e) => ({
     title: e.data.title,
     meta: `${e.data.category} · ${formatDate(e.data.pubDate)} · ${readingLabel(e.data.readingTime)}`,
-    href: `/blog/${e.id}/`,
+    href: `/blog/${e.slug}/`,
     placeholder: false,
   }));
   while (rows.length < 3) {

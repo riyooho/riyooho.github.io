@@ -1,0 +1,33 @@
+---
+import { getCollection } from 'astro:content';
+import { toWritingRows } from '../lib/slides.js';
+
+// Three rows: real posts first (featured, then newest), the rest labelled placeholders.
+const rows = toWritingRows(await getCollection('blog'));
+---
+
+<section class="box" id="writ" aria-labelledby="wr">
+  <div class="hd">
+    <h2 id="wr"><i aria-hidden="true"></i>Selected writing</h2>
+    <a class="all" href="/blog/">All writing</a>
+  </div>
+  <ol class="feed">
+    {rows.map((row) =>
+      row.href ? (
+        <li>
+          <div>
+            <a href={row.href}><h3>{row.title}</h3></a>
+            <span class="meta">{row.meta}</span>
+          </div>
+        </li>
+      ) : (
+        <li class="ph">
+          <div>
+            <h3>{row.title}</h3>
+            <span class="meta">{row.meta}</span>
+          </div>
+        </li>
+      )
+    )}
+  </ol>
+</section>
