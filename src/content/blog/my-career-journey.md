@@ -7,6 +7,7 @@ tags:
   - "Career"
   - "Analyst"
 readingTime: 3
+featured: true
 ---
 
 Awalnya saya hanya menjalankan proses. Tapi semakin lama, saya sadar kalau proses yang sama tidak pernah benar-benar menyelesaikan masalah.

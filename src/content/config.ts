@@ -16,6 +16,7 @@ const projects = defineCollection({
     repo:        z.string().optional(),
     demo:        z.string().optional(),
     featured:    z.boolean().default(false),
+    cover:       z.string().optional(),
   }),
 });
 
@@ -28,6 +29,7 @@ const blog = defineCollection({
     category:    z.string(),
     tags:        z.array(z.string()),
     readingTime: z.number(),
+    featured:    z.boolean().default(false),
   }),
 });
 
