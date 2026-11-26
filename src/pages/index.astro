@@ -1,10 +1,11 @@
 ---
 import HomeLayout from '../layouts/HomeLayout.astro';
+import ProfileBox from '../components/ProfileBox.astro';
 ---
 
 <HomeLayout title="Wahyu Satrio Nugroho, business and supply chain analyst" description="Business, operations and supply chain analyst. I find the root cause of a problem, then lead the fix as project manager.">
   <main class="dash">
-    <section class="box" id="prof" aria-label="Profile"></section>
+    <ProfileBox />
     <section class="box" id="proj" aria-labelledby="pj">
       <div class="hd"><h2 id="pj"><i aria-hidden="true"></i>Projects</h2></div>
     </section>
