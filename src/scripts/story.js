@@ -1,6 +1,6 @@
 import { createStory } from '../lib/story-data.js';
 import { STEPS, PLAN } from '../data/story-copy.js';
-import { fit, reducedMotion } from './canvas.js';
+import { ease, fit, reducedMotion } from './canvas.js';
 import { createTimer } from './timer.js';
 
 const BLUE = '#2E4BD8';
@@ -11,6 +11,26 @@ const LATE_ZONE = '#FCE9E2';
 const AXIS = 24; // px kept free under the columns for the day labels
 const STEP_MS = 9000;
 const FONT = "13px 'Schibsted Grotesk', sans-serif";
+const FINAL = 1e9; // "elapsed" value that means every scene is in its final state
+
+// All scene timing in one place (milliseconds from the start of a scene).
+const SCENE = {
+  total: [2800, 3000, 2900, 3300, 5400], // how long each scene runs
+  morph: [1400, 1100, 1100, 900, 1000], // squares moving into the scene's layout
+  pulse: 1500, // Define: late orders pulse once, staggered by up to 700 ms
+  line: [1000, 1400], // Measure: the 4-day line is drawn
+  limitLabel: [1300, 1600],
+  zone: [1300, 1900], // Measure: late zone wipes in
+  lateLabel: [1800, 2200],
+  rowTint: [1200, 1700], // Analyze: warehouse row lights up
+  counts: [1100, 1900],
+  share: [1900, 2300],
+  dim: [1500, 2000], // Analyze: the other stages fade back
+  sweep: [900, 2600], // Improve: slider sweeps from 0 to the chosen value
+  rollout: [2900, 4900], // Control: fixes turn blue one by one (week 3 to 6)
+};
+
+const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
 
 /**
  * The "How I work" story: five scenes drawn from simulated orders on one canvas.
@@ -22,15 +42,24 @@ export function initStory(box) {
   const el = (id) => box.querySelector('#' + id);
   const canvas = el('cv');
   const tabs = [...el('steps').children];
+  const kpiBox = el('kv').parentElement;
+  const textBox = el('txt');
   let ctx;
   let W = 0;
   let H = 0;
   let step = 0;
-  let pct = 50; // share of warehouse delays fixed in the Improve scene
+  let pctGoal = 50; // share of warehouse delays the visitor chose to fix (slider)
+  let pct = pctGoal; // the value being shown (differs from pctGoal during the Improve sweep)
+  let E = FINAL; // elapsed ms in the current scene
+  let ann = 1; // opacity of axis labels while squares are still moving
+  let raf = 0;
+  let kpiRaf = 0;
+  let kpiShown = orders.length;
 
-  /** One drawn square per order: position, size, rotation and colour. */
-  const marks = orders.map((o) => ({ o, x: 0, y: 0, s: 0, t: 0, c: BLUE }));
-  const fixedCount = () => Math.floor((warehouse.length * pct) / 100);
+  /** One drawn square per order: position, size, rotation, colour, and where it moves from and to. */
+  const marks = orders.map((o) => ({ o, x: 0, y: 0, s: 0, t: 0, c: BLUE, from: [0, 0, 0, 0], to: [0, 0, 0, 0] }));
+  const fixedCount = () => Math.floor((warehouse.length * pctGoal) / 100);
+  const ms = ([a, b]) => clamp((E - a) / (b - a));
 
   // ---------- layouts: [x, y, size, colour] per order, indexed by id - 1 ----------
 
@@ -89,29 +118,32 @@ export function initStory(box) {
     return targetGrid();
   }
 
-  // ---------- drawing (final state of each scene) ----------
+  // ---------- drawing: every effect is a function of E, so E = FINAL draws the final state ----------
 
   function drawBackground() {
     if (step === 1) {
       const bw = W / 9;
       ctx.fillStyle = LATE_ZONE;
-      ctx.fillRect(4 * bw, 0, W - 4 * bw, H - AXIS);
+      ctx.fillRect(4 * bw, 0, (W - 4 * bw) * ms(SCENE.zone), H - AXIS);
     }
     if (step === 2) {
       const rowH = (H - 20) / 4;
       ctx.fillStyle = LATE_ZONE;
-      ctx.fillRect(0, rowH + 1, W, rowH);
+      ctx.fillRect(0, rowH + 1, W * ms([1200, 1700]), rowH);
     }
   }
 
   function drawNotes() {
+    ctx.globalAlpha = ann;
     ctx.fillStyle = INK;
     ctx.strokeStyle = '#8794BC';
     ctx.lineWidth = 1;
     ctx.font = FONT;
-    const text = (s, x, y, align = 'left') => {
+    const text = (s, x, y, align = 'left', alpha = 1) => {
+      ctx.globalAlpha = ann * alpha;
       ctx.textAlign = align;
       ctx.fillText(s, x, y);
+      ctx.globalAlpha = ann;
     };
     if (step === 0) {
       ctx.fillStyle = BLUE;
@@ -125,6 +157,7 @@ export function initStory(box) {
     if (step === 1 || step === 3) {
       const h = histogram((o) => o.d);
       const y = H - AXIS + 2;
+      const lineDrawn = step === 1 ? ms(SCENE.line) : 1;
       ctx.beginPath();
       ctx.moveTo(0, y);
       ctx.lineTo(W, y);
@@ -134,11 +167,13 @@ export function initStory(box) {
       ctx.setLineDash([4, 3]);
       ctx.beginPath();
       ctx.moveTo(4 * h.bw, 10);
-      ctx.lineTo(4 * h.bw, y);
+      ctx.lineTo(4 * h.bw, 10 + (y - 10) * lineDrawn);
       ctx.stroke();
       ctx.setLineDash([]);
-      text('4-day limit', 4 * h.bw + 6, 20);
-      if (step === 1) text(`${late.length} late · ${Math.round((late.length / orders.length) * 100)}%`, W - 4, 20, 'right');
+      text('4-day limit', 4 * h.bw + 6, 20, 'left', step === 1 ? ms(SCENE.limitLabel) : 1);
+      if (step === 1) {
+        text(`${late.length} late · ${Math.round((late.length / orders.length) * 100)}%`, W - 4, 20, 'right', ms(SCENE.lateLabel));
+      }
       if (step === 3) {
         // thin outline = the baseline columns before any fix
         ctx.strokeStyle = '#6E7DAE';
@@ -150,36 +185,68 @@ export function initStory(box) {
     }
     if (step === 2) {
       const { labelW, rowH, u } = stageRows();
+      const run = ease(ms(SCENE.counts));
       sites.forEach((name, i) => {
         ctx.font = (i === 1 ? '600 ' : '') + FONT;
         const y = 4 + i * rowH + u * 2 + 5;
         text(name, 0, y);
-        text(String(bySite[i]), labelW + Math.ceil(bySite[i] / 4) * u + 8, y);
+        text(String(Math.round(bySite[i] * run)), labelW + Math.ceil(bySite[i] / 4) * u + 8, y);
       });
       ctx.font = '600 ' + FONT;
-      text(`${Math.round((warehouse.length / late.length) * 100)}% of late orders`, labelW + Math.ceil(bySite[1] / 4) * u + 42, 4 + rowH + u * 2 + 5);
+      text(
+        `${Math.round((warehouse.length / late.length) * 100)}% of late orders`,
+        labelW + Math.ceil(bySite[1] / 4) * u + 42,
+        4 + rowH + u * 2 + 5,
+        'left',
+        ms(SCENE.share)
+      );
       ctx.font = FONT;
       text('Late orders by stage', W, H - 2, 'right');
     }
-    if (step === 4) text(`${fixedCount()} of ${warehouse.length} target orders fixed`, 0, 14);
+    if (step === 4) {
+      const n = fixedCount();
+      const [from, to] = SCENE.rollout;
+      const done = E > 1e8 ? n : E < from ? 0 : Math.min(n, Math.floor(((E - from) * n) / (to - from)) + 1);
+      text(`${done} of ${warehouse.length} target orders fixed`, 0, 14);
+    }
+    ctx.globalAlpha = 1;
   }
 
   function draw() {
+    if (!ctx) return;
     ctx.clearRect(0, 0, W, H);
     drawBackground();
     const fixed = fixedCount();
+    const [rollFrom, rollTo] = SCENE.rollout;
     for (const m of marks) {
       if (m.s < 0.3) continue;
-      // in the Control scene the pilot fixes turn blue
-      ctx.fillStyle = step === 4 && m.o.rk !== undefined && m.o.rk < fixed ? BLUE : m.c;
+      let size = m.s;
+      let colour = m.c;
+      let alpha = 1;
+      if (step === 0 && m.o.late) {
+        const at = SCENE.pulse + m.o.b * 700;
+        size *= 1 + 0.6 * Math.sin(Math.PI * clamp((E - at) / 450));
+      }
+      if (step === 2 && m.o.late && m.o.site !== 1) alpha = 1 - 0.55 * ms(SCENE.dim);
+      if (step === 4 && m.o.rk !== undefined && m.o.rk < fixed) {
+        const at = rollFrom + ((rollTo - rollFrom) * m.o.rk) / fixed;
+        if (E >= at) colour = BLUE;
+        size *= 1 + 0.5 * Math.sin(Math.PI * clamp((E - at) / 300));
+      }
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = colour;
       if (m.t) {
         ctx.save();
         ctx.translate(m.x + m.s / 2, m.y + m.s / 2);
         ctx.rotate(m.t);
-        ctx.fillRect(-m.s / 2, -m.s / 2, m.s, m.s);
+        ctx.fillRect(-size / 2, -size / 2, size, size);
         ctx.restore();
-      } else ctx.fillRect(m.x, m.y, m.s, m.s);
+      } else {
+        const grow = (size - m.s) / 2;
+        ctx.fillRect(m.x - grow, m.y - grow, size, size);
+      }
     }
+    ctx.globalAlpha = 1;
     drawNotes();
   }
 
@@ -193,6 +260,20 @@ export function initStory(box) {
     return [['Days', 'Orders'], ...[1, 2, 3, 4, 5, 6, 7, 8, 9].map((d) => [d, orders.filter((o) => daysOf(o) === d).length])];
   }
 
+  /** Counts the KPI to its new value over 500 ms (jumps under reduced motion). */
+  function countTo(value) {
+    const from = kpiShown;
+    kpiShown = value;
+    cancelAnimationFrame(kpiRaf);
+    if (reducedMotion()) return (el('kv').textContent = value);
+    const t0 = performance.now();
+    (function tick(t) {
+      const p = Math.min(1, (t - t0) / 500);
+      el('kv').textContent = Math.round(from + (value - from) * ease(p));
+      if (p < 1) kpiRaf = requestAnimationFrame(tick);
+    })(t0);
+  }
+
   function writeText(fade) {
     const s = STEPS[step];
     const [value, label, hot] = s.kpi(story, pct);
@@ -200,9 +281,9 @@ export function initStory(box) {
     el('hd').textContent = s.question;
     el('bd').textContent = s.body(story, pct);
     el('rv').textContent = Math.round(pct) + '%';
-    el('kv').textContent = value;
     el('kv').classList.toggle('h', hot);
     el('kl').textContent = label;
+    countTo(value);
     canvas.setAttribute('aria-label', `${s.question} ${el('bd').textContent}`);
     el('tb').innerHTML =
       `<caption>Step data ${step + 1}</caption>` +
@@ -210,10 +291,9 @@ export function initStory(box) {
         .map((r, i) => '<tr>' + r.map((c) => (i ? `<td>${c}</td>` : `<th scope="col">${c}</th>`)).join('') + '</tr>')
         .join('');
     if (fade) {
-      const txt = el('txt');
-      txt.classList.remove('fade');
-      void txt.offsetWidth; // restart the CSS animation
-      txt.classList.add('fade');
+      textBox.classList.remove('fade');
+      void textBox.offsetWidth; // restart the CSS animation
+      textBox.classList.add('fade');
     }
   }
 
@@ -221,37 +301,115 @@ export function initStory(box) {
 
   const timer = createTimer({ duration: STEP_MS, enabled: !reducedMotion() });
 
-  function go(next) {
+  /**
+   * @param {number} next step index (wraps)
+   * @param {{ play?: boolean, quick?: boolean }} [how] play = animate the scene; quick = only the short move
+   *   (used while dragging the slider, so the whole scene is not replayed)
+   */
+  function go(next, { play = false, quick = false } = {}) {
     const changed = next !== step;
     step = ((next % STEPS.length) + STEPS.length) % STEPS.length;
     timer.reset();
+    cancelAnimationFrame(raf);
     el('tip').style.display = 'none';
+    kpiBox.setAttribute('aria-live', 'polite');
+    textBox.setAttribute('aria-live', 'polite');
     tabs.forEach((t, i) => {
       t.setAttribute('aria-pressed', String(i === step));
       t.style.removeProperty('--p');
     });
     el('sl').style.display = step === 3 ? 'block' : 'none';
     el('plan').style.display = step === 4 ? 'flex' : 'none';
+
+    const animate = play && !reducedMotion();
+    const sweep = animate && !quick && step === 3;
+    const fall = animate && !quick && step === 0;
+    pct = sweep ? 0 : pctGoal;
+    el('rg').value = pct;
     writeText(changed);
+
     const g = layout(step);
     marks.forEach((m, i) => {
-      [m.x, m.y, m.s, m.c] = g[i];
-      m.t = step === 0 ? (m.o.rot - 0.5) * 2.4 : 0;
+      m.from = fall ? [g[i][0], -24 - m.o.b * 40, g[i][2], 0] : [m.x, m.y, m.s, m.t];
+      m.to = [g[i][0], g[i][1], g[i][2], step === 0 ? (m.o.rot - 0.5) * 2.4 : 0];
+      m.c = g[i][3];
     });
-    draw();
+    const put = (amount) =>
+      marks.forEach((m) => {
+        const z = amount(m);
+        [m.x, m.y, m.s, m.t] = m.from.map((v, k) => v + (m.to[k] - v) * z);
+      });
+
+    if (!animate) {
+      E = FINAL;
+      ann = 1;
+      put(() => 1);
+      return draw();
+    }
+
+    const t0 = performance.now();
+    const total = quick ? 750 : SCENE.total[step];
+    const morph = quick ? 750 : SCENE.morph[step];
+    if (sweep) {
+      kpiBox.setAttribute('aria-live', 'off');
+      textBox.setAttribute('aria-live', 'off');
+    }
+    let decile = -1;
+    (function frame(now) {
+      const e = now - t0;
+      E = quick ? FINAL : e;
+      const p = e / morph;
+      if (sweep && e > SCENE.morph[3]) {
+        pct = pctGoal * ease(clamp((e - SCENE.sweep[0]) / (SCENE.sweep[1] - SCENE.sweep[0])));
+        const h = layout(3);
+        marks.forEach((m, i) => {
+          // follow the moving targets so squares glide to their new columns
+          m.x += (h[i][0] - m.x) * 0.25;
+          m.y += (h[i][1] - m.y) * 0.25;
+          m.s += (h[i][2] - m.s) * 0.25;
+          m.c = h[i][3];
+          m.to = [h[i][0], h[i][1], h[i][2], 0];
+        });
+        el('rg').value = pct;
+        el('rv').textContent = Math.round(pct) + '%';
+        kpiShown = story.remainingLate(pct);
+        el('kv').textContent = kpiShown;
+        if (Math.round(pct / 10) !== decile) {
+          decile = Math.round(pct / 10);
+          el('bd').textContent = STEPS[3].body(story, pct);
+        }
+      } else {
+        put((m) => ease(clamp((p - m.o.a * 0.25) / 0.75)));
+      }
+      ann = clamp(p * 3 - 2);
+      draw();
+      if (e < total) raf = requestAnimationFrame(frame);
+      else {
+        pct = pctGoal;
+        E = FINAL;
+        ann = 1;
+        put(() => 1);
+        if (sweep) {
+          kpiBox.setAttribute('aria-live', 'polite');
+          textBox.setAttribute('aria-live', 'polite');
+          writeText(false);
+        }
+        draw();
+      }
+    })(t0);
   }
 
-  tabs.forEach((t, i) => t.addEventListener('click', () => go(i)));
+  tabs.forEach((t, i) => t.addEventListener('click', () => go(i, { play: true })));
   el('rg').addEventListener('input', (e) => {
-    pct = Number(e.target.value);
-    go(3);
+    pctGoal = Number(e.target.value);
+    go(3, { play: true, quick: true });
   });
 
   // Arrow keys move between steps, except while the slider has focus.
   box.addEventListener('keydown', (e) => {
     if (e.target instanceof HTMLInputElement || !['ArrowLeft', 'ArrowRight'].includes(e.key)) return;
     e.preventDefault();
-    go(step + (e.key === 'ArrowRight' ? 1 : -1));
+    go(step + (e.key === 'ArrowRight' ? 1 : -1), { play: true });
   });
 
   // Tooltip on the squares.
@@ -283,13 +441,21 @@ export function initStory(box) {
   (function frame(now) {
     const { advanced, progress } = timer.tick(now - last, hovered || focused || document.hidden);
     last = now;
-    if (advanced) go(step + 1);
+    if (advanced) go(step + 1, { play: true });
     else tabs[step].style.setProperty('--p', progress * 100 + '%');
     requestAnimationFrame(frame);
   })(last);
 
+  // Size the canvas right away so a click before the first resize callback still draws.
+  [ctx, W, H] = fit(canvas);
+
+  // The first resize callback plays the opening scene; later resizes redraw the current scene as it is.
+  let opened = false;
   new ResizeObserver(() => {
     [ctx, W, H] = fit(canvas);
-    go(step);
+    if (opened) return go(step);
+    opened = true;
+    go(0, { play: true });
   }).observe(el('stage'));
+  document.fonts?.ready.then(() => ctx && draw());
 }
