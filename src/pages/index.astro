@@ -2,6 +2,7 @@
 import HomeLayout from '../layouts/HomeLayout.astro';
 import ProfileBox from '../components/ProfileBox.astro';
 import ProjectsBox from '../components/ProjectsBox.astro';
+import StoryBox from '../components/StoryBox.astro';
 import WritingBox from '../components/WritingBox.astro';
 ---
 
@@ -10,8 +11,6 @@ import WritingBox from '../components/WritingBox.astro';
     <ProfileBox />
     <ProjectsBox />
     <WritingBox />
-    <section class="box" id="story" aria-labelledby="sh">
-      <div class="hd"><h2 id="sh"><i aria-hidden="true"></i>How I work</h2></div>
-    </section>
+    <StoryBox />
   </main>
 </HomeLayout>
