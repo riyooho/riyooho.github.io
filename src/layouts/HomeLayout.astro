@@ -1,0 +1,25 @@
+---
+import '../styles/dashboard.css';
+import '@fontsource/schibsted-grotesk/400.css';
+import '@fontsource/schibsted-grotesk/500.css';
+import '@fontsource/schibsted-grotesk/600.css';
+import '@fontsource/schibsted-grotesk/800.css';
+import Head from '../components/Head.astro';
+
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+  type?: 'website' | 'article';
+  canonical?: string;
+}
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <Head {...Astro.props} />
+
+  <body>
+    <slot />
+  </body>
+</html>

@@ -6,7 +6,7 @@ import mdx from '@astrojs/mdx';
 export default defineConfig({
   site: 'https://riyooho.github.io',
   integrations: [
-    tailwind(),
+    tailwind({ applyBaseStyles: false }), // global.css already has the @tailwind directives
     // sitemap(),
     mdx(),
   ],

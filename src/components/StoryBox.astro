@@ -1,0 +1,65 @@
+---
+import { createStory } from '../lib/story-data.js';
+import { STEPS, PLAN } from '../data/story-copy.js';
+
+// Step 1 is rendered on the server so the box still says something without JavaScript.
+const story = createStory();
+const first = STEPS[0];
+const [kpiValue, kpiLabel] = first.kpi(story, 50);
+const late = story.late.length;
+const onTime = story.orders.length - late;
+---
+
+<section class="box" id="story" aria-labelledby="sh">
+  <div class="stx">
+    <div class="hd">
+      <h2 id="sh"><i aria-hidden="true"></i>How I work<small class="sim">simulated data</small></h2>
+      <div class="kpi"><b id="kv">{kpiValue}</b><small id="kl">{kpiLabel}</small></div>
+    </div>
+    <div class="srow">
+      <div class="steps" id="steps" role="group" aria-label="Story steps">
+        {STEPS.map((s, i) => <button type="button" aria-pressed={i === 0 ? 'true' : 'false'}>{s.tab}</button>)}
+      </div>
+    </div>
+    <div id="txt">
+      <p class="role" id="rl">{first.role}</p>
+      <h3 id="hd">{first.question}</h3>
+      <p id="bd">{first.body(story, 50)}</p>
+    </div>
+  </div>
+  <div class="stage" id="stage">
+    <canvas id="cv" role="img" aria-label={first.question}></canvas>
+    <div id="plan">
+      <div class="prw" style="border:0"><span></span><small>Weeks 1 to 6</small></div>
+      {PLAN.map(([task, owner, start, weeks], i) => (
+        <div class="prw">
+          <span>{task} <small>· {owner}</small></span>
+          <span class="bar">
+            <i style={`left:${(start / 6) * 100}%;width:${(weeks / 6) * 100}%;animation-delay:${i * 0.12}s`}></i>
+            <span class="now" aria-hidden="true"></span>
+          </span>
+        </div>
+      ))}
+    </div>
+    <div id="sl">
+      <label for="rg">Warehouse delays fixed: <b id="rv">50%</b></label>
+      <input id="rg" type="range" min="0" max="100" step="10" value="50" />
+    </div>
+    <div id="tip"></div>
+    <div class="sr" role="status" id="say"></div>
+    <div class="sr">
+      <table id="tb">
+        <caption>Step data 1</caption>
+        <tr><th scope="col">Status</th><th scope="col">Orders</th></tr>
+        <tr><td>On time</td><td>{onTime}</td></tr>
+        <tr><td>Late</td><td>{late}</td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { initStory } from '../scripts/story.js';
+  const box = document.getElementById('story');
+  if (box) initStory(box);
+</script>

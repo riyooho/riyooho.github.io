@@ -1,0 +1,48 @@
+---
+// Profile: photo, name, one-line pitch, three facts, links. All copy is fixed by the spec.
+---
+
+<section class="box" id="prof" aria-label="Profile">
+  <div>
+    <div class="who">
+      <figure class="me">
+        <img
+          src="/images/me-crop.jpg"
+          width="360"
+          height="480"
+          fetchpriority="high"
+          alt="Wahyu Satrio wearing glasses, light blue headphones and a pink t-shirt"
+        />
+      </figure>
+      <div class="nm">
+        <canvas id="motif" aria-hidden="true"></canvas>
+        <h1>Wahyu Satrio Nugroho</h1>
+      </div>
+    </div>
+    <p class="pl">
+      Business, operations and supply chain analyst. I find the root cause of a problem, then lead the fix as project manager.
+    </p>
+  </div>
+  <div>
+    <dl class="kv">
+      <dt>Current</dt><dd><b>Analyst Lead, Evermos</b></dd>
+      <dt>Location</dt><dd>Bandung, open to relocating to Greater Jakarta</dd>
+      <dt>Open to</dt><dd>Permanent roles and freelance work</dd>
+    </dl>
+    <div class="links">
+      <a class="lk p" href="mailto:riyonugroho@outlook.com">
+        <svg aria-hidden="true" viewBox="0 0 16 16"><path d="M1.5 3.5h13v9h-13zM1.5 4l6.5 5 6.5-5" fill="none" stroke="currentColor" stroke-width="1.5"></path></svg>Email
+      </a>
+      <a class="lk" href="https://linkedin.com/in/wsnugroho">LinkedIn</a>
+      <a class="lk" href="https://github.com/riyooho">GitHub</a>
+      <span class="lk off" aria-disabled="true" title="CV file not available yet">CV coming soon</span>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { initMotif } from '../scripts/motif.js';
+  const box = document.getElementById('prof');
+  const canvas = document.getElementById('motif');
+  if (box && canvas instanceof HTMLCanvasElement) initMotif(canvas, box);
+</script>

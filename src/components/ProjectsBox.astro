@@ -1,0 +1,50 @@
+---
+import { getCollection } from 'astro:content';
+import { toProjectSlides } from '../lib/slides.js';
+
+// Real featured projects (at most 5), or three labelled placeholders when none is featured.
+const slides = toProjectSlides(await getCollection('projects'));
+const pad = (n: number) => String(n).padStart(2, '0');
+---
+
+<section class="box" id="proj" aria-labelledby="pj" aria-roledescription="carousel">
+  <div class="hd">
+    <h2 id="pj"><i aria-hidden="true"></i>Projects</h2>
+    <div class="ctl">
+      <span class="cnt" id="pc">{pad(1)} / {pad(slides.length)}</span>
+      <a class="all" href="/projects/">All projects</a>
+    </div>
+  </div>
+  <div class="slides" id="slides">
+    {slides.map((s, i) => (
+      <article class={i === 0 ? 'sl on' : 'sl'} aria-roledescription="slide" aria-label={`${i + 1} of ${slides.length}`}>
+        <div class="thumb">
+          {s.cover ? (
+            <img src={s.cover} alt="" loading="lazy" />
+          ) : (
+            <>
+              <canvas aria-hidden="true"></canvas>
+              <span>Preview only, real chart coming soon</span>
+            </>
+          )}
+        </div>
+        <span class="tag">{s.category}</span>
+        {s.href ? <a href={s.href}><h3>{s.title}</h3></a> : <h3>{s.title}</h3>}
+        <p class="meta">{s.meta}</p>
+        <p class="more">{s.href ? <a href={s.href}>Read the case study</a> : 'Case study coming soon'}</p>
+      </article>
+    ))}
+  </div>
+  <div class="sr" role="status" id="say-proj"></div>
+  <div class="dots" id="dots">
+    {slides.map((_, i) => (
+      <button type="button" aria-label={`Show project ${i + 1}`}><i><b></b></i></button>
+    ))}
+  </div>
+</section>
+
+<script>
+  import { initCarousel } from '../scripts/carousel.js';
+  const box = document.getElementById('proj');
+  if (box) initCarousel(box);
+</script>
