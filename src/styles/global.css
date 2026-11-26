@@ -24,18 +24,12 @@
   }
 
   body {
-    @apply bg-surface text-ink font-body antialiased;
-    background-image:
-      radial-gradient(
-        ellipse 80% 50% at 50% -20%,
-        rgba(200, 85, 42, 0.05) 0%,
-        transparent 60%
-      );
+    @apply bg-paper text-ink font-body antialiased;
   }
 
   ::selection {
-    background-color: #c8552a;
-    color: #f5f2ec;
+    background-color: #2e4bd8;
+    color: #ffffff;
   }
 
   h1,
@@ -329,7 +323,7 @@
 
   .now-strip {
     @apply grid grid-cols-4 gap-3
-           bg-[#111010]
+           bg-ink
            px-7 py-3.5;
   }
 
@@ -366,14 +360,14 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #f5f2ec;
+  background: #ebf0f8;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #c8c4bc;
+  background: #c9d2e6;
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #c8552a;
+  background: #2e4bd8;
 }

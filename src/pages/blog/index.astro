@@ -11,7 +11,7 @@ const posts = (await getCollection('blog')).sort(
 const allCategories = ['All', ...new Set(posts.map(p => p.data.category))];
 ---
 
-<BaseLayout title="Blog — Satrio">
+<BaseLayout title="Blog | Wahyu Satrio Nugroho">
   <Navbar />
   <main class="pt-24 pb-section">
     <div class="container-site">

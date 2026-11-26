@@ -4,16 +4,17 @@ export default {
   theme: {
     extend: {
       colors: {
-        ink:     '#111010',
-        paper:   '#F5F2EC',
-        accent:  '#C8552A',
-        muted:   '#8A8580',
-        subtle:  '#E8E4DC',
-        surface: '#FEFCF8',
+        ink:     '#10183F',
+        paper:   '#EBF0F8',
+        accent:  '#2E4BD8',
+        'accent-soft': '#8FA2FF', // accent on dark backgrounds
+        muted:   '#4B557F',
+        subtle:  '#DCE3F1',
+        surface: '#FFFFFF',
       },
       fontFamily: {
-        display: ['Syne', 'sans-serif'],
-        body:    ['Lora', 'Georgia', 'serif'],
+        display: ['Schibsted Grotesk', 'sans-serif'],
+        body:    ['Schibsted Grotesk', 'sans-serif'],
         mono:    ['JetBrains Mono', 'monospace'],
       },
       fontSize: {
