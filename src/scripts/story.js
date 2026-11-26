@@ -42,7 +42,6 @@ export function initStory(box) {
   const el = (id) => box.querySelector('#' + id);
   const canvas = el('cv');
   const tabs = [...el('steps').children];
-  const kpiBox = el('kv').parentElement;
   const textBox = el('txt');
   let ctx;
   let W = 0;
@@ -297,23 +296,28 @@ export function initStory(box) {
     }
   }
 
+  /** Tells screen readers about a step the visitor chose; autoplay stays silent. */
+  function announce() {
+    const s = STEPS[step];
+    el('say').textContent = `${s.tab}. ${s.question} ${s.body(story, pctGoal)}`;
+  }
+
   // ---------- moving between steps ----------
 
   const timer = createTimer({ duration: STEP_MS, enabled: !reducedMotion() });
 
   /**
    * @param {number} next step index (wraps)
-   * @param {{ play?: boolean, quick?: boolean }} [how] play = animate the scene; quick = only the short move
-   *   (used while dragging the slider, so the whole scene is not replayed)
+   * @param {{ play?: boolean, quick?: boolean, user?: boolean }} [how] play = animate the scene; quick = only the
+   *   short move (used while dragging the slider, so the whole scene is not replayed); user = the visitor asked
+   *   for it, so it is announced to screen readers (autoplay never is)
    */
-  function go(next, { play = false, quick = false } = {}) {
+  function go(next, { play = false, quick = false, user = false } = {}) {
     const changed = next !== step;
     step = ((next % STEPS.length) + STEPS.length) % STEPS.length;
     timer.reset();
     cancelAnimationFrame(raf);
     el('tip').style.display = 'none';
-    kpiBox.setAttribute('aria-live', 'polite');
-    textBox.setAttribute('aria-live', 'polite');
     tabs.forEach((t, i) => {
       t.setAttribute('aria-pressed', String(i === step));
       t.style.removeProperty('--p');
@@ -327,6 +331,7 @@ export function initStory(box) {
     pct = sweep ? 0 : pctGoal;
     el('rg').value = pct;
     writeText(changed);
+    if (user) announce();
 
     const g = layout(step);
     marks.forEach((m, i) => {
@@ -350,10 +355,6 @@ export function initStory(box) {
     const t0 = performance.now();
     const total = quick ? 750 : SCENE.total[step];
     const morph = quick ? 750 : SCENE.morph[step];
-    if (sweep) {
-      kpiBox.setAttribute('aria-live', 'off');
-      textBox.setAttribute('aria-live', 'off');
-    }
     let decile = -1;
     (function frame(now) {
       const e = now - t0;
@@ -389,27 +390,23 @@ export function initStory(box) {
         E = FINAL;
         ann = 1;
         put(() => 1);
-        if (sweep) {
-          kpiBox.setAttribute('aria-live', 'polite');
-          textBox.setAttribute('aria-live', 'polite');
-          writeText(false);
-        }
+        if (sweep) writeText(false);
         draw();
       }
     })(t0);
   }
 
-  tabs.forEach((t, i) => t.addEventListener('click', () => go(i, { play: true })));
+  tabs.forEach((t, i) => t.addEventListener('click', () => go(i, { play: true, user: true })));
   el('rg').addEventListener('input', (e) => {
     pctGoal = Number(e.target.value);
-    go(3, { play: true, quick: true });
+    go(3, { play: true, quick: true, user: true });
   });
 
   // Arrow keys move between steps, except while the slider has focus.
   box.addEventListener('keydown', (e) => {
     if (e.target instanceof HTMLInputElement || !['ArrowLeft', 'ArrowRight'].includes(e.key)) return;
     e.preventDefault();
-    go(step + (e.key === 'ArrowRight' ? 1 : -1), { play: true });
+    go(step + (e.key === 'ArrowRight' ? 1 : -1), { play: true, user: true });
   });
 
   // Tooltip on the squares.

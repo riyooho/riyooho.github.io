@@ -14,14 +14,14 @@ const onTime = story.orders.length - late;
   <div class="stx">
     <div class="hd">
       <h2 id="sh"><i aria-hidden="true"></i>How I work<small class="sim">simulated data</small></h2>
-      <div class="kpi" aria-live="polite"><b id="kv">{kpiValue}</b><small id="kl">{kpiLabel}</small></div>
+      <div class="kpi"><b id="kv">{kpiValue}</b><small id="kl">{kpiLabel}</small></div>
     </div>
     <div class="srow">
       <div class="steps" id="steps" role="group" aria-label="Story steps">
         {STEPS.map((s, i) => <button type="button" aria-pressed={i === 0 ? 'true' : 'false'}>{s.tab}</button>)}
       </div>
     </div>
-    <div id="txt" aria-live="polite">
+    <div id="txt">
       <p class="role" id="rl">{first.role}</p>
       <h3 id="hd">{first.question}</h3>
       <p id="bd">{first.body(story, 50)}</p>
@@ -46,6 +46,7 @@ const onTime = story.orders.length - late;
       <input id="rg" type="range" min="0" max="100" step="10" value="50" />
     </div>
     <div id="tip"></div>
+    <div class="sr" role="status" id="say"></div>
     <div class="sr">
       <table id="tb">
         <caption>Step data 1</caption>

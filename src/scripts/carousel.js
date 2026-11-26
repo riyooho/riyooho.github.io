@@ -22,7 +22,12 @@ export function initCarousel(box) {
   let index = 0;
   const timer = createTimer({ duration: SLIDE_MS, enabled: !reducedMotion() });
 
-  function show(i) {
+  const say = box.querySelector('#say-proj');
+
+  /** @param {number} i  @param {boolean} [user] announce only what the visitor chose; autoplay stays silent */
+  function show(i, user = false) {
+    // keyboard focus inside the slide that is about to become inert would fall to <body>
+    const hadFocus = slides[index]?.contains(document.activeElement);
     index = (i + slides.length) % slides.length;
     slides.forEach((s, k) => {
       s.classList.toggle('on', k === index);
@@ -33,6 +38,8 @@ export function initCarousel(box) {
       d.querySelector('b').style.width = k < index ? '100%' : '0';
     });
     if (counter) counter.textContent = `${pad(index + 1)} / ${pad(slides.length)}`;
+    if (hadFocus) dots[index].focus();
+    if (user && say) say.textContent = `Project ${index + 1} of ${slides.length}: ${slides[index].querySelector('h3')?.textContent ?? ''}`;
     timer.reset();
   }
 
@@ -55,11 +62,11 @@ export function initCarousel(box) {
     if (!box.contains(e.relatedTarget)) focused = false;
   });
 
-  dots.forEach((d, k) => d.addEventListener('click', () => show(k)));
+  dots.forEach((d, k) => d.addEventListener('click', () => show(k, true)));
   box.addEventListener('keydown', (e) => {
     if (e.target instanceof HTMLInputElement || !['ArrowLeft', 'ArrowRight'].includes(e.key)) return;
     e.preventDefault();
-    show(index + (e.key === 'ArrowRight' ? 1 : -1));
+    show(index + (e.key === 'ArrowRight' ? 1 : -1), true);
   });
 
   let last = performance.now();

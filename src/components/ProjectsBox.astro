@@ -11,7 +11,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
   <div class="hd">
     <h2 id="pj"><i aria-hidden="true"></i>Projects</h2>
     <div class="ctl">
-      <span class="cnt" id="pc" aria-live="polite">{pad(1)} / {pad(slides.length)}</span>
+      <span class="cnt" id="pc">{pad(1)} / {pad(slides.length)}</span>
       <a class="all" href="/projects/">All projects</a>
     </div>
   </div>
@@ -35,6 +35,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
       </article>
     ))}
   </div>
+  <div class="sr" role="status" id="say-proj"></div>
   <div class="dots" id="dots">
     {slides.map((_, i) => (
       <button type="button" aria-label={`Show project ${i + 1}`}><i><b></b></i></button>
